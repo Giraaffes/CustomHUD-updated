@@ -76,8 +76,8 @@ public class SpecialSupplierElement implements HudElement {
                                                       () -> client.player.getOffHandStack().getName().getString().length(),
                                                       () -> !client.player.getOffHandStack().isEmpty());
 
-    public static final Entry GRAPHICS_MODE = of( () -> client.options.getGraphicsMode().getValue().toString(),
-                                                  () -> client.options.getGraphicsMode().getValue() == GraphicsMode.FAST ? 0 : (client.options.getGraphicsMode().getValue() == GraphicsMode.FANCY ? 1 : 2),
+    public static final Entry GRAPHICS_MODE = of( () -> client.options.getPreset().getValue().toString(),
+                                                  () -> client.options.getPreset().getValue() == GraphicsMode.FAST ? 0 : (client.options.getPreset().getValue() == GraphicsMode.FANCY ? 1 : 2),
                                                   () -> true);
 
     public static final Entry CLOUDS = of( () -> client.options.getCloudRenderMode().getValue() == CloudRenderMode.OFF ? "off" : (client.options.getCloudRenderMode().getValue() == CloudRenderMode.FAST ? "fast" : "fancy"),

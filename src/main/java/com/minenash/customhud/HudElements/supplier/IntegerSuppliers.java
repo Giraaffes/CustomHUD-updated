@@ -18,7 +18,9 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.village.VillagerData;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.LightType;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.SpawnHelper;
+import net.minecraft.world.attribute.WorldEnvironmentAttributeAccess;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.LightingProvider;
@@ -170,7 +172,11 @@ public class IntegerSuppliers {
     public static final Supplier<Number> WORLD_HEIGHT = () -> ComplexData.world.getHeight();
     public static final Supplier<Number> WORLD_COORD_SCALE = () -> ComplexData.world.getDimension().coordinateScale();;
 
-    public static final Supplier<Number> MOON_PHASE = () -> ComplexData.clientChunk.isEmpty() ? null : client.world.getMoonPhase()+1;
+    public static final Supplier<Number> MOON_PHASE = () -> {
+        if (ComplexData.clientChunk.isEmpty()) return null;
+        WorldEnvironmentAttributeAccess worldAttributes = client.world.getEnvironmentAttributes();
+        return worldAttributes.getAttributeValue(EnvironmentAttributes.MOON_PHASE_VISUAL).getIndex() + 1;
+    };
 
     public static final Supplier<Number> SPAWN_CHUNKS = () -> {
         SpawnHelper.Info info = ComplexData.serverWorld.getChunkManager().getSpawnInfo();

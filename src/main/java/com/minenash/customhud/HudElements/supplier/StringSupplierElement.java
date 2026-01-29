@@ -12,9 +12,12 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.resource.ResourceType;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.attribute.WorldEnvironmentAttributeAccess;
 import net.minecraft.world.biome.source.util.VanillaBiomeParameters;
 import net.minecraft.world.gen.densityfunction.DensityFunctions;
 import org.apache.commons.lang3.text.WordUtils;
@@ -47,7 +50,13 @@ public class StringSupplierElement implements HudElement {
     public static final Supplier<String> BIOME = () -> I18n.translate("biome." + client.world.getBiome(blockPos()).getKey().get().getValue().toString().replace(':', '.'));
 
     private static final String[] moon_phases = new String[]{"full moon", "waning gibbous", "last quarter", "waning crescent", "new moon", "waxing crescent", "first quarter", "waxing gibbous"};
-    public static final Supplier<String> MOON_PHASE_WORD = () -> ComplexData.clientChunk.isEmpty() ? null : moon_phases[client.world.getMoonPhase()];
+    public static final Supplier<String> MOON_PHASE_WORD = () -> {
+        if (ComplexData.clientChunk.isEmpty()) return null;
+        WorldEnvironmentAttributeAccess worldAttributes = client.world.getEnvironmentAttributes();
+        return moon_phases[worldAttributes.getAttributeValue(EnvironmentAttributes.MOON_PHASE_VISUAL).getIndex()];
+    };
+
+    // ComplexData.clientChunk.isEmpty() ? null : moon_phases[client.world.getMoonPhase()];
 
     public static final Supplier<String> TIME_AM_PM = () -> ComplexData.timeOfDay < 12000 ? "am" : "pm";
 

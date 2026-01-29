@@ -9,12 +9,12 @@ import com.minenash.customhud.mixin.accessors.GameOptionsAccessor;
 import com.minenash.customhud.mixin.accessors.KeyBindingAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.*;
+import net.minecraft.client.render.ChunkBuilderMode;
 import net.minecraft.network.message.ChatVisibility;
 import net.minecraft.particle.ParticlesMode;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Pair;
-import net.minecraft.util.TranslatableOption;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -132,30 +132,33 @@ public class SettingsElement {
             return new NumberSupplierElement(NumberSupplierElement.of(() -> (Number) option.getValue(), option.getValue() instanceof Integer ? 0 : 1), flags);
         if (option.getValue() instanceof String)
             return new StringSupplierElement(() -> ((String)option.getValue()).isEmpty() ? "Default" : (String)option.getValue());
-        if (option.getValue() instanceof TranslatableOption) {
-            final int falseValue = getFalseValue((TranslatableOption) option.getValue());
-            return new SpecialSupplierElement(SpecialSupplierElement.of(
-                    () -> ((TranslatableOption)option.getValue()).getText().getString(),
-                    ((TranslatableOption) option.getValue())::getId,
-                    () -> ((TranslatableOption)option.getValue()).getId() != falseValue
-            ));
-        }
         if (option.getValue() instanceof NarratorMode)
             return new SpecialSupplierElement(SpecialSupplierElement.of(
                     () -> ((NarratorMode) option.getValue()).getName().getString(),
                     () -> ((NarratorMode) option.getValue()).getId(),
                     () -> ((NarratorMode) option.getValue()).getId() != 0
             ));
+        if (option.getValue() instanceof GraphicsMode)
+            return new SpecialSupplierElement(SpecialSupplierElement.GRAPHICS_MODE);
+        if (
+            option.getValue() instanceof ParticlesMode ||
+            option.getValue() instanceof ChatVisibility ||
+            option.getValue() instanceof Arm ||
+            option.getValue() instanceof ChunkBuilderMode ||
+            option.getValue() instanceof CloudRenderMode ||
+            option.getValue() instanceof AttackIndicator
+        ) {
+            final String translatedString = switch (option.getValue()) {
+                case ParticlesMode val -> val.getText().getString();
+                case ChatVisibility val -> val.getText().getString();
+                case Arm val -> val.getText().getString();
+                case ChunkBuilderMode val -> val.getText().getString();
+                case CloudRenderMode val -> val.getText().getString();
+                case AttackIndicator val -> val.getText().getString();
+                default -> throw new IllegalStateException("Unexpected value: " + option.getValue());
+            };
+            return new StringSupplierElement(() -> translatedString);
+        }
         return null;
     }
-
-    private static int getFalseValue(TranslatableOption option) {
-        if (option instanceof ParticlesMode || option instanceof ChatVisibility)
-            return 2;
-        if (option instanceof Arm)
-            return 1;
-        return 0; // GraphicsMode, AoMode, ChunkBuilderMode, CloudRenderMode, AttackIndicator
-
-    }
-
 }
